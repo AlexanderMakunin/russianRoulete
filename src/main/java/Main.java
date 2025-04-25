@@ -136,6 +136,7 @@ public class Main {
      */
     private static boolean game() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         boolean win = false;
+        deathCounter = 0;
         boolean found;
         int round = 1;
         do {
