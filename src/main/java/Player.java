@@ -48,7 +48,7 @@ public class Player {
      * @return if killed or not
      */
     public boolean shoot() {
-        if (count == loadedBullet) {
+        if (chamber[count]) {
             alive = false;
             count++;
             return true;

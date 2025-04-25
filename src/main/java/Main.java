@@ -1,11 +1,14 @@
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import javax.sound.sampled.*;
 
 public class Main {
     private static final ArrayList<Player> players = new ArrayList<>();
     public static Scanner scanner = new Scanner(System.in);
     private static int deathCounter = 0;
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         askManyPlayers();
         boolean newGame;
         do {
@@ -35,7 +38,7 @@ public class Main {
         do {
             manyPlayer = readNumber();
             if (manyPlayer < ConfigGame.minPlayers) {
-                System.out.println("Tiene que ser mayor a " + ConfigGame.minPlayers);
+                System.err.println("Tiene que ser mayor a " + ConfigGame.minPlayers);
             }
         } while (manyPlayer < 2);
         for (int i = 0; i < manyPlayer; i++) {
@@ -56,12 +59,12 @@ public class Main {
             try {
                 input = Integer.parseInt(scanner.nextLine());
                 if (input < 0) {
-                    System.out.println("Tine que un numero positivo");
+                    System.err.println("Tine que un numero positivo");
                 } else {
                     check = true;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Intentelo otra vez");
+                System.err.println("Intentelo otra vez");
             }
         } while (!check);
         return input;
@@ -78,7 +81,7 @@ public class Main {
                 System.out.println("Indique un nombre");
                 input = scanner.nextLine();
             } catch (NumberFormatException e) {
-                System.out.println("introduzca algo");
+                System.err.println("introduzca algo");
             }
         } while (input.isEmpty());
         return input;
@@ -98,7 +101,7 @@ public class Main {
      * @param name the player name
      * @return if found the player
      */
-    private static boolean searchAndShoot(String name) {
+    private static boolean searchAndShoot(String name) throws LineUnavailableException, UnsupportedAudioFileException, IOException {
         boolean foundName = false;
         for (Player player : players) {
             if (player.getNombre().equals(name)) {
@@ -107,9 +110,11 @@ public class Main {
                     if (shoot) {
                         System.out.println(ConfigGame.gunDead);
                         System.out.println("El jugador: " + player + " ha muerto");
+                        audio(ConfigGame.audioShot);
                         deathCounter++;
                     } else {
                         System.out.println(ConfigGame.gunAlive);
+                        audio(ConfigGame.audioEmptyShot);
                         System.out.println("El jugador: " + player + " sigue vivo");
                     }
                 } else {
@@ -129,7 +134,7 @@ public class Main {
      * The game
      * @return if the player wants play again or not
      */
-    private static boolean game() {
+    private static boolean game() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         boolean win = false;
         boolean found;
         int round = 1;
@@ -155,5 +160,12 @@ public class Main {
         System.out.println("(1 para si, 2 para no)");
         int newGame = readNumber();
         return newGame == 1;
+    }
+
+    private static void audio(File auido) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(auido);
+        Clip clip = AudioSystem.getClip();
+        clip.open(audioStream);
+        clip.start();
     }
 }

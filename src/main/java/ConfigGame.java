@@ -1,3 +1,5 @@
+import java.io.File;
+
 public class ConfigGame {
     public static final int balasCargador = 6;
     public static final int minPlayers = 2;
@@ -15,6 +17,7 @@ public class ConfigGame {
             |         \\
             `-._____.-'
             """;
+    public static final File audioEmptyShot = new File("src/main/java/audio/emptyShot.wav");
     public static final String gunDead = """
                       ^
                      | |
@@ -34,4 +37,5 @@ public class ConfigGame {
                  #   __   #
                  \\########/
             """;
+    public static final File audioShot = new File("src/main/java/audio/pistoKillAudio.wav");
 }
