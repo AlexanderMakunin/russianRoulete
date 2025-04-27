@@ -38,4 +38,9 @@ public class ConfigGame {
                  \\########/
             """;
     public static final File audioShot = new File("src/main/java/audio/pistoKillAudio.wav");
+    public static final File startGameMusic = new File("src/main/java/audio/StartGame.wav");
+    public static final File inGameMusic = new File("src/main/java/audio/InGame.wav");
+    public static final File postGameMusic = new File("src/main/java/audio/PostGame.wav");
+    public static final File calmBreathing = new File("src/main/java/audio/calmBreathing.wav");
+    public static final File nervousBreathing = new File("src/main/java/audio/nervousBreathing.wav");
 }

@@ -8,7 +8,7 @@ public class Main {
     private static final ArrayList<Player> players = new ArrayList<>();
     public static Scanner scanner = new Scanner(System.in);
     private static int deathCounter = 0;
-    public static void main(String[] args) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    public static void main(String[] args) throws UnsupportedAudioFileException, LineUnavailableException, IOException, InterruptedException {
         askManyPlayers();
         boolean newGame;
         do {
@@ -26,13 +26,18 @@ public class Main {
     private static void resetGame() {
         for (Player player : players) {
             player.reset();
+            deathCounter = 0;
         }
     }
 
     /**
      * Ask user how many players will play
+     * @throws UnsupportedAudioFileException
+     * @throws LineUnavailableException
+     * @throws IOException
      */
-    private static void askManyPlayers() {
+    private static void askManyPlayers() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        Clip clip = audio(ConfigGame.startGameMusic);
         System.out.println("Cuantos jugadores? el minimo es: " + ConfigGame.minPlayers);
         int manyPlayer;
         do {
@@ -46,6 +51,7 @@ public class Main {
             Player player = new Player(username);
             players.add(player);
         }
+        clip.stop();
     }
 
     /**
@@ -91,31 +97,47 @@ public class Main {
      * Show all players
      */
     private static void showPlayers() {
+        int lines = 5;
         for (Player player : players) {
             System.out.println(player);
+            for (int i = 0; i < lines; i++) {
+                System.out.print("-");
+            }
+            System.out.println();
         }
     }
 
     /**
-     * Search a player and make the player shoot
-     * @param name the player name
+     * Search the player and make him shoot
+     * @param name the player
+     * @param audio the audio to make it stop
      * @return if found the player
+     * @throws LineUnavailableException
+     * @throws UnsupportedAudioFileException
+     * @throws IOException
+     * @throws InterruptedException
      */
-    private static boolean searchAndShoot(String name) throws LineUnavailableException, UnsupportedAudioFileException, IOException {
+    private static boolean searchAndShoot(String name, Clip audio) throws LineUnavailableException, UnsupportedAudioFileException, IOException, InterruptedException {
         boolean foundName = false;
+        audio.stop();
+        Clip calmBreath = audio(ConfigGame.nervousBreathing);
+        Thread.sleep(3*1000);
+        calmBreath.stop();
         for (Player player : players) {
             if (player.getNombre().equals(name)) {
                 if (player.isAlive()) {
                     boolean shoot = player.shoot();
                     if (shoot) {
                         System.out.println(ConfigGame.gunDead);
-                        System.out.println("El jugador: " + player + " ha muerto");
+                        System.out.println("El jugador: " + player.getNombre() + " ha muerto");
                         audio(ConfigGame.audioShot);
                         deathCounter++;
                     } else {
                         System.out.println(ConfigGame.gunAlive);
                         audio(ConfigGame.audioEmptyShot);
-                        System.out.println("El jugador: " + player + " sigue vivo");
+                        Thread.sleep(1000);
+                        audio(ConfigGame.calmBreathing);
+                        System.out.println("El jugador: " + player.getNombre() + " sigue vivo");
                     }
                 } else {
                     System.out.println("Ese jugador esta muerto");
@@ -127,16 +149,22 @@ public class Main {
         if (!foundName) {
             System.out.println("no se ha encontrado: " + name);
         }
+        clearScreen();
+        audio.start();
         return foundName;
     }
 
     /**
      * The game
-     * @return if the player wants play again or not
+     * @return if the players want do it again
+     * @throws UnsupportedAudioFileException
+     * @throws LineUnavailableException
+     * @throws IOException
+     * @throws InterruptedException
      */
-    private static boolean game() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    private static boolean game() throws UnsupportedAudioFileException, LineUnavailableException, IOException, InterruptedException {
+        Clip clip = audio(ConfigGame.inGameMusic);
         boolean win = false;
-        deathCounter = 0;
         boolean found;
         int round = 1;
         do {
@@ -144,29 +172,57 @@ public class Main {
             showPlayers();
             do {
                 String name = askName();
-                found = searchAndShoot(name);
+                found = searchAndShoot(name, clip);
             } while (!found);
             if (deathCounter == players.size()-1) {
                 win = true;
                 for (Player player : players) {
                     if (player.isAlive()) {
-                        System.out.println("El jugador: " + player + " a ganado");
+                        clip.stop();
+                        System.out.println("El jugador: " + player.getNombre() + " a ganado");
+                        System.out.println(player);
+                        break;
                     }
-                    break;
                 }
             }
             round++;
         } while (!win);
+        Clip endGameAudio = audio(ConfigGame.postGameMusic);
         System.out.println("Otra partida?");
         System.out.println("(1 para si, 2 para no)");
         int newGame = readNumber();
+        endGameAudio.stop();
         return newGame == 1;
     }
 
-    private static void audio(File auido) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+    /**
+     * Clean the screen doing 50 prints
+     */
+    public static void clearScreen() {
+        try {
+            Thread.sleep(2 * 1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        final int jumps = 50;
+        for (int i = 0; i < jumps; i++) {
+            System.out.println();
+        }
+    }
+
+    /**
+     * Add audio to the game
+     * @param auido the audio wants
+     * @return the audio
+     * @throws UnsupportedAudioFileException
+     * @throws IOException
+     * @throws LineUnavailableException
+     */
+    private static Clip audio(File auido) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         AudioInputStream audioStream = AudioSystem.getAudioInputStream(auido);
         Clip clip = AudioSystem.getClip();
         clip.open(audioStream);
         clip.start();
+        return clip;
     }
 }

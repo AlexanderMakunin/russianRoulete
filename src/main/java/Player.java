@@ -81,10 +81,8 @@ public class Player {
 
     @Override
     public String toString() {
-        return "Player{" +
-                "nombre = " + nombre + '\'' +
-                ", " + status() + '\'' +
-                ", contador de disparos = " + count +
-                '}';
+        return "Jugador: " + nombre + "\n" +
+               "estado: " + status() + "\n" +
+                "contador de disparos = " + count;
     }
 }
